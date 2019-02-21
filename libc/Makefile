@@ -1,31 +1,53 @@
-DEFAULT_HOST!=../default-host.sh
-HOST?=DEFAULT_HOST
-HOSTARCH!=../target-triplet-to-arch.sh $(HOST)
+# Makefile - kernel directory
+# ---------------------------------------------------------------------------
+#
+# Run this makefile to build the kernel (only kernel)
+# Run 'make help' for a list of targets
+#
 
-CFLAGS?=-O2 -g
-CPPFLAGS?=
-LDFLAGS?=
-LIBS?=
+# TODO
+# add help target
+# check local build directories
+# check HOSTEDOBJS and ARCH_HOSTEDOBJS
 
-DESTDIR?=
+override SHELL:=/bin/sh
+
+ifeq (${MAKELEVEL},0)
+
+# Prepare to run as top makefile (not default)
+
+include ../config/make/make.config
+
+# Build directories (local)
+
 PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-INCLUDEDIR?=$(PREFIX)/include
-LIBDIR?=$(EXEC_PREFIX)/lib
+EXEC_PREFIX?=${PREFIX}
+INCLUDEDIR?=${PREFIX}/include
+LIBDIR?=${EXEC_PREFIX}/lib
 
-CFLAGS:=$(CFLAGS) -ffreestanding -Wall -Wextra
-CPPFLAGS:=$(CPPFLAGS) -D__is_libc -Iinclude
-LIBK_CFLAGS:=$(CFLAGS)
-LIBK_CPPFLAGS:=$(CPPFLAGS) -D__is_libk
+endif
 
-ARCHDIR=arch/$(HOSTARCH)
+include ${ROOT_SRC_DIR}/config/make/make.output
 
-include $(ARCHDIR)/make.config
+DESTDIR?=${SYSROOT}
 
-CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
-CPPFLAGS:=$(CPPFLAGS) $(ARCH_CPPFLAGS)
-LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CPPFLAGS:=$(LIBK_CPPFLAGS) $(KERNEL_ARCH_CPPFLAGS)
+# Default compiler flags
+
+CFLAGS:=${CFLAGS}
+CLFLAGS:= -D__is_libc -Iinclude
+CXXFLAGS:=${CXXFLAGS}
+LIBK_CFLAGS:=${CFLAGS}
+LIBK_CLFLAGS:=${CFLAGS} -D__is_libk
+LIBK_CXXFLAGS:=${CXXFLAGS}
+
+ARCHDIR=arch/${TARGETARCH}
+
+include ${ARCHDIR}/make.config
+
+CFLAGS:=${CFLAGS} ${ARCH_CFLAGS}
+CXXFLAGS:=${CXXFLAGS} ${ARCH_CXXFLAGS}
+LIBK_CFLAGS:=${LIBK_CFLAGS} ${KERNEL_ARCH_CFLAGS}
+LIBK_CXXFLAGS:=${LIBK_CXXFLAGS} ${KERNEL_ARCH_CXXFLAGS}
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
@@ -51,43 +73,51 @@ LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 #BINARIES=libc.a libk.a # Not ready for libc yet.
 BINARIES=libk.a
 
-.PHONY: all clean install install-headers install-libs
-.SUFFIXES: .o .libk.o .c .S
+.PHONY: all clean install install-headers install-libs help
 
 all: $(BINARIES)
 
 libc.a: $(OBJS)
-	$(AR) rcs $@ $(OBJS)
+	$(call cmd,ar)
+	$(Q)$(AR) rcs $@ $(OBJS)
 
 libk.a: $(LIBK_OBJS)
-	$(AR) rcs $@ $(LIBK_OBJS)
+	$(call cmd,ar)
+	$(Q)$(AR) rcs $@ $(LIBK_OBJS)
 
-.c.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CPPFLAGS)
+%.o: %.c
+	$(call cmd,cc)
+	$(Q)$(CC) -MD -c $< -o $@ -std=gnu11 $(CFLAGS) $(CLFLAGS)
 
-.c.S:
-	$(CC) -MD -c $< -o $@ $(CFLAGS) $(CPPFLAGS)
+%.S: %.c
+	$(call cmd,as)
+	$(Q)$(CC) -MD -c $< -o $@ $(CFLAGS) $(CLFLAGS)
 
-.c.libk.o:
-	$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+%.libk.o: %.c
+	$(call cmd,cc)
+	$(Q)$(CC) -MD -c $< -o $@ -std=gnu11 $(LIBK_CFLAGS) $(LIBK_CLFLAGS)
 
-.S.libk.o:
-	$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CPPFLAGS)
+%.libk.o: %.S
+	$(call cmd,as)
+	$(Q)$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CLFLAGS)
 
 clean:
-	rm -f $(BINARIES) *.a
-	rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
-	rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
+	-$(Q)rm -f $(BINARIES) *.a
+	-$(Q)rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
+	-$(Q)rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
+	@echo '   Clean done!'
 
 install: install-headers install-libs
 
 install-headers:
-	mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
+	@echo '   Installing headers to $(DESTDIR)$(INCLUDEDIR)'
+	$(Q)mkdir -p $(DESTDIR)$(INCLUDEDIR)
+	$(Q)cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-libs: $(BINARIES)
-	mkdir -p $(DESTDIR)$(LIBDIR)
-	cp $(BINARIES) $(DESTDIR)$(LIBDIR)
+	@echo '   Installing libraries to $(DESTDIR)$(LIBDIR)'
+	$(Q)mkdir -p $(DESTDIR)$(LIBDIR)
+	$(Q)cp $(BINARIES) $(DESTDIR)$(LIBDIR)
 
 -include $(OBJS:.o=.d)
 -include $(LIBK_OBJS:.o=.d)
