@@ -38,7 +38,6 @@ KERNEL_ISO := ${PROJECT_NAME}-${VERSION}.${SUBVERSION}-${RELEASE}.iso
 all: ${SUBDIRS}
 
 install-headers: ${SYSROOT} #header-subdirs
-	@echo '##########install-headers##############'
 	@for dir in ${SUBDIRS}; do \
 		${MAKE} -C $$dir install-headers; \
 	done
@@ -62,7 +61,7 @@ ${SUBDIRS}: ${SYSROOT}
 	@for dir in ${SUBDIRS}; do \
 		${MAKE} -C $$dir install-headers; \
 	done
-	${MAKE} -C $@ install
+	@${MAKE} -C $@ install
 
 kernel: libc
 
