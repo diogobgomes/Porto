@@ -62,7 +62,7 @@ ${SUBDIRS}: ${SYSROOT}
 	@for dir in ${SUBDIRS}; do \
 		${MAKE} -C $$dir install-headers; \
 	done
-	@${MAKE} -C $@ install
+	${MAKE} -C $@ install
 
 kernel: libc
 
@@ -82,7 +82,7 @@ install: all
 
 clean:
 	@for dir in ${SUBDIRS}; do \
-		@${MAKE} -C $$dir clean; \
+		${MAKE} -C $$dir clean; \
 	done
 	-$(Q)rm -rf ${SYSROOT}
 	-$(Q)rm -rf isodir

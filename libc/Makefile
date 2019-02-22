@@ -1,5 +1,5 @@
 # Makefile - kernel directory
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 #
 # Run this makefile to build the kernel (only kernel)
 # Run 'make help' for a list of targets

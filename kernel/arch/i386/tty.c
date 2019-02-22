@@ -29,17 +29,18 @@ void terminal_initialize(void) {
 	}
 }
 
-void terminal_setcolor(uint8_t color) {
+// TODO: figure out how the hell we'll handle colors
+/*static void terminal_setcolor(uint8_t color) {
 	terminal_color = color;
-}
+}*/
 
-void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
+static void terminal_putentryat(unsigned char c, uint8_t color, size_t x, size_t y) {
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = vga_entry(c, color);
 }
 
 void terminal_putchar(char c) {
-	unsigned char uc = c;
+	unsigned char uc = (unsigned char)c; // Why would you send a negative char?
 	terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
