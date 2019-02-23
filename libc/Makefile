@@ -73,7 +73,7 @@ LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 #BINARIES=libc.a libk.a # Not ready for libc yet.
 BINARIES=libk.a
 
-.PHONY: all clean install install-headers install-libs help
+.PHONY: all clean install install-libs help
 
 all: $(BINARIES)
 
@@ -107,14 +107,16 @@ clean:
 	-$(Q)rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
 	@echo '   Clean done!'
 
-install: install-headers install-libs
+install: install-libs
 
 install-headers:
 	@echo '   Installing headers to $(DESTDIR)$(INCLUDEDIR)'
 	$(Q)mkdir -p $(DESTDIR)$(INCLUDEDIR)
 	$(Q)cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
-install-libs: $(BINARIES)
+install-libs: $(BINARIES) $(DESTDIR)$(LIBDIR)/$(BINARIES)
+
+$(DESTDIR)$(LIBDIR)/$(BINARIES): $(BINARIES)
 	@echo '   Installing libraries to $(DESTDIR)$(LIBDIR)'
 	$(Q)mkdir -p $(DESTDIR)$(LIBDIR)
 	$(Q)cp $(BINARIES) $(DESTDIR)$(LIBDIR)

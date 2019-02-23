@@ -69,7 +69,7 @@ $(LIBS) \
 $(ARCHDIR)/crtend.o \
 $(ARCHDIR)/crtn.o \
 
-.PHONY: all clean install install-headers install-kernel
+.PHONY: all clean install install-kernel
 .SUFFIXES: .o .c .S
 
 all: ${PROJECT_NAME}.kernel
@@ -96,14 +96,16 @@ clean:
 	-$(Q)rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
 	@echo '   Clean done!'
 
-install: install-headers install-kernel
+install: install-kernel
 
-install-headers:
-	@echo '   Installing headers to $(DESTDIR)$(INCLUDEDIR)'
-	$(Q)mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	$(Q)cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
+#install-headers:
+#	@echo '   Installing headers to $(DESTDIR)$(INCLUDEDIR)'
+#	$(Q)mkdir -p $(DESTDIR)$(INCLUDEDIR)
+#	$(Q)cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
-install-kernel: ${PROJECT_NAME}.kernel
+install-kernel: ${PROJECT_NAME}.kernel $(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel
+
+$(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel: $(PROJECT_NAME).kernel
 	@echo '   Installing kernel to $(DESTDIR)$(BOOTDIR)'
 	$(Q)mkdir -p $(DESTDIR)$(BOOTDIR)
 	$(Q)cp ${PROJECT_NAME}.kernel $(DESTDIR)$(BOOTDIR)

@@ -28,7 +28,7 @@ export INCLUDEDIR:=$(PREFIX)/include
 
 # Subdirectories where we have to go with make
 SUBDIRS:=libc kernel
-HEADER_SUBDIRS=${SUBDIRS}
+HEADER_SUBDIR=include
 
 # Final kernel iso
 KERNEL_ISO := ${PROJECT_NAME}-${VERSION}.${SUBVERSION}-${RELEASE}.iso
@@ -37,10 +37,17 @@ KERNEL_ISO := ${PROJECT_NAME}-${VERSION}.${SUBVERSION}-${RELEASE}.iso
 
 all: ${SUBDIRS}
 
-install-headers: ${SYSROOT} #header-subdirs
-	@for dir in ${SUBDIRS}; do \
-		${MAKE} -C $$dir install-headers; \
-	done
+install-headers: $(SYSROOT) $(SYSROOT)$(INCLUDEDIR)
+
+$(SYSROOT)$(INCLUDEDIR): $(HEADER_SUBDIR)
+	@echo 'Installing headers to $(SYSROOT)$(INCLUDEDIR)'
+	$(Q)mkdir -p $(SYSROOT)$(INCLUDEDIR)
+	$(Q)cp -R --preserve=timestamp $(HEADER_SUBDIR)/. $(SYSROOT)$(INCLUDEDIR)
+
+#install-headers: ${SYSROOT} #header-subdirs
+#	@for dir in ${SUBDIRS}; do \
+#		${MAKE} -C $$dir install-headers; \
+#	done
 
 #${SUBDIRS}/include: ${SYSROOT} #header-subdirs
 #	@echo '##########install-headers##############'
@@ -56,11 +63,8 @@ install-headers: ${SYSROOT} #header-subdirs
 #subdirs: ${SUBDIRS}
 #	@echo '#########subdirs##############3'
 
-${SUBDIRS}: ${SYSROOT}
+${SUBDIRS}: ${SYSROOT} install-headers
 	@# We must intall-headers first because for successfull install we must garantee all headers are installed
-	@for dir in ${SUBDIRS}; do \
-		${MAKE} -C $$dir install-headers; \
-	done
 	@${MAKE} -C $@ install
 
 kernel: libc
@@ -69,7 +73,9 @@ ${SYSROOT}:
 	$(Q)mkdir -p ${SYSROOT}
 
 
-install: all
+install: all $(KERNEL_ISO)
+
+$(KERNEL_ISO):
 	@echo '   Installing OS to isodir/boot/grub'
 	$(Q)mkdir -p isodir/boot/grub
 	$(Q)cp sysroot/boot/${PROJECT_NAME}.kernel isodir/boot/${PROJECT_NAME}.kernel
