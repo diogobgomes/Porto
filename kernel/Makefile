@@ -10,9 +10,10 @@
 # check local build directories
 # IMPORTANT: target crtbegin and crtend need revamp - no OBJ=...
 
+export
 override SHELL:=/bin/sh
 
-ifeq (${MAKELEVEL},0)
+ifeq ($(MAKELEVEL),0)
 
 # Prepare to run as top makefile (not default)
 
@@ -27,9 +28,9 @@ INCLUDEDIR?=$(PREFIX)/include
 
 endif
 
-include ${ROOT_SRC_DIR}/config/make/make.output
+include ../config/make/make.output
 
-DESTDIR?=${SYSROOT}
+DESTDIR?=$(SYSROOT)
 
 # Default compiler flags
 
@@ -72,15 +73,22 @@ $(ARCHDIR)/crtn.o \
 .PHONY: all clean install install-kernel
 .SUFFIXES: .o .c .S
 
-all: ${PROJECT_NAME}.kernel
+all: $(PROJECT_NAME).kernel
 
-${PROJECT_NAME}.kernel: $(OBJS) $(ARCHDIR)/linker.ld
+$(PROJECT_NAME).kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	$(call cmd,ld)
 	$(Q)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	grub-file --is-x86-multiboot ${PROJECT_NAME}.kernel
+	@echo '  Checking for multiboot'
+	$(Q)if $(ISOCHECKTOOL) --is-x86-multiboot $(PROJECT_NAME).kernel; then \
+	  echo '   Multiboot confirmed!'; \
+	else \
+	  echo '   Error: No valid multiboot!'; \
+	  exit 10; \
+	fi;
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
-	OBJ=`$(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)` && cp "$$OBJ" $@
+	$(call cmd,cp)
+	$(Q)cp $(shell $(CC) $(CFLAGS) $(LDFLAGS) -print-file-name=$(@F)) $@
 
 %.o: %.c
 	$(call cmd,cc)
@@ -91,23 +99,18 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 	$(Q)$(CC) -MD -c $< -o $@ $(CFLAGS) $(CKFLAGS)
 
 clean:
-	-$(Q)rm -f ${PROJECT_NAME}.kernel
-	-$(Q)rm -f $(OBJS) *.o */*.o */*/*.o
-	-$(Q)rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
+	-$(Q)rm -f $(PROJECT_NAME).kernel
+	-$(Q)rm -f $(shell find . -name '*.o')
+	-$(Q)rm -f $(shell find . -name '*.d')
 	@echo '   Clean done!'
 
 install: install-kernel
 
-#install-headers:
-#	@echo '   Installing headers to $(DESTDIR)$(INCLUDEDIR)'
-#	$(Q)mkdir -p $(DESTDIR)$(INCLUDEDIR)
-#	$(Q)cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
-
-install-kernel: ${PROJECT_NAME}.kernel $(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel
+install-kernel: $(PROJECT_NAME).kernel $(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel
 
 $(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel: $(PROJECT_NAME).kernel
 	@echo '   Installing kernel to $(DESTDIR)$(BOOTDIR)'
 	$(Q)mkdir -p $(DESTDIR)$(BOOTDIR)
-	$(Q)cp ${PROJECT_NAME}.kernel $(DESTDIR)$(BOOTDIR)
+	$(Q)cp $(PROJECT_NAME).kernel $(DESTDIR)$(BOOTDIR)
 
 -include $(OBJS:.o=.d)

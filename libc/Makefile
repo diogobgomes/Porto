@@ -10,9 +10,10 @@
 # check local build directories
 # check HOSTEDOBJS and ARCH_HOSTEDOBJS
 
+export
 override SHELL:=/bin/sh
 
-ifeq (${MAKELEVEL},0)
+ifeq ($(MAKELEVEL),0)
 
 # Prepare to run as top makefile (not default)
 
@@ -21,33 +22,33 @@ include ../config/make/make.config
 # Build directories (local)
 
 PREFIX?=/usr/local
-EXEC_PREFIX?=${PREFIX}
-INCLUDEDIR?=${PREFIX}/include
-LIBDIR?=${EXEC_PREFIX}/lib
+EXEC_PREFIX?=$(PREFIX)
+INCLUDEDIR?=$(PREFIX)/include
+LIBDIR?=$(EXEC_PREFIX)/lib
 
 endif
 
-include ${ROOT_SRC_DIR}/config/make/make.output
+include ../config/make/make.output
 
-DESTDIR?=${SYSROOT}
+DESTDIR?=$(SYSROOT)
 
 # Default compiler flags
 
-CFLAGS:=${CFLAGS}
+CFLAGS:=$(CFLAGS)
 CLFLAGS:= -D__is_libc -Iinclude
-CXXFLAGS:=${CXXFLAGS}
-LIBK_CFLAGS:=${CFLAGS}
-LIBK_CLFLAGS:=${CFLAGS} -D__is_libk
-LIBK_CXXFLAGS:=${CXXFLAGS}
+CXXFLAGS:=$(CXXFLAGS)
+LIBK_CFLAGS:=$(CFLAGS)
+LIBK_CLFLAGS:=$(CFLAGS) -D__is_libk
+LIBK_CXXFLAGS:=$(CXXFLAGS)
 
-ARCHDIR=arch/${TARGETARCH}
+ARCHDIR=arch/$(TARGETARCH)
 
-include ${ARCHDIR}/make.config
+include $(ARCHDIR)/make.config
 
-CFLAGS:=${CFLAGS} ${ARCH_CFLAGS}
-CXXFLAGS:=${CXXFLAGS} ${ARCH_CXXFLAGS}
-LIBK_CFLAGS:=${LIBK_CFLAGS} ${KERNEL_ARCH_CFLAGS}
-LIBK_CXXFLAGS:=${LIBK_CXXFLAGS} ${KERNEL_ARCH_CXXFLAGS}
+CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
+CXXFLAGS:=$(CXXFLAGS) $(ARCH_CXXFLAGS)
+LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LIBK_CXXFLAGS:=$(LIBK_CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
 
 FREEOBJS=\
 $(ARCH_FREEOBJS) \
@@ -103,16 +104,11 @@ libk.a: $(LIBK_OBJS)
 
 clean:
 	-$(Q)rm -f $(BINARIES) *.a
-	-$(Q)rm -f $(OBJS) $(LIBK_OBJS) *.o */*.o */*/*.o
-	-$(Q)rm -f $(OBJS:.o=.d) $(LIBK_OBJS:.o=.d) *.d */*.d */*/*.d
+	-$(Q)rm -f $(shell find . -name '*.o')
+	-$(Q)rm -f $(shell find . -name '*.d')
 	@echo '   Clean done!'
 
 install: install-libs
-
-install-headers:
-	@echo '   Installing headers to $(DESTDIR)$(INCLUDEDIR)'
-	$(Q)mkdir -p $(DESTDIR)$(INCLUDEDIR)
-	$(Q)cp -R --preserve=timestamps include/. $(DESTDIR)$(INCLUDEDIR)/.
 
 install-libs: $(BINARIES) $(DESTDIR)$(LIBDIR)/$(BINARIES)
 
