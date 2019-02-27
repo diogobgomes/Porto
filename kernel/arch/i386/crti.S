@@ -1,3 +1,10 @@
+# CRTI ASSEMBLY STUB
+#
+# Small assembly stub that gcc processes to include crtbegin.o
+#
+#
+# 2019 Diogo Gomes
+
 .section .init
 .global _init
 .type _init, @function

@@ -1,9 +1,14 @@
-# Makefile - kernel directory
-# ---------------------------------------------------------------------------
+# KERNEL DIRECTORY MAKEFILE - v0.1
 #
-# Run this makefile to build the kernel (only kernel)
-# Run 'make help' for a list of targets
+# Not ready to be used as Makefile, it's used by the configure script to build
+# the final Makefile, that will be used to build the kernel
 #
+# If you haven't already, run the configure script in the top level directory!
+#
+# In the final makefile, run 'make help' for a list of targets
+#
+#
+# 2019 Diogo Gomes
 
 # TODO
 # add help target
@@ -20,8 +25,6 @@ BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 endif
-
-include ../config/make/output.mk
 
 DESTDIR?=$(SYSROOT)
 

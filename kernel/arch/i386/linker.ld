@@ -1,3 +1,10 @@
+/* LINKER.LD
+ *
+ * Custom linker script suited for OSDev
+ *
+ *
+ * 2019 Diogo Gomes */
+
 /* The bootloader will look at this image and start execution at the symbol
    designated at the entry point. */
 ENTRY(_start)

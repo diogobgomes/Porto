@@ -1,3 +1,11 @@
+/* VGA.H - ARCHITECTURE DEPENDENT (i686-elf) INTERACTION WITH VGA
+ *
+ * Title says it all
+ *
+ *
+ * 2019 Diogo Gomes
+*/
+
 #ifndef ARCH_I386_VGA_H
 #define ARCH_I386_VGA_H
 

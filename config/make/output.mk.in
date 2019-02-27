@@ -1,3 +1,12 @@
+# CONFIGURE FILE FOR MAKEFILES
+#
+# Used to configure the output of makefiles - to be included by configure script,
+# not usefull on it's own
+#
+#
+# 2019 Diogo Gomes
+
+#
 # Beautify output - inspired by linux kernel makefiles
 # ---------------------------------------------------------------------------
 #

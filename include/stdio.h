@@ -1,7 +1,6 @@
-/* stdio.h - standart I/O functions for C/C++
- * Custom made for Porto
+/* STDIO.H - STANDART I/O FUNCTIONS FOR C/C++
  *
- * printf, putchar, puts
+ * Custom made for Porto
  *
  *
  * 2019 Diogo Gomes
@@ -25,9 +24,10 @@ extern "C" {
 int printf(const char* __restrict, ...);
 
 // Prints a single character to std out (in principle, that would be the screen)
+// Be carefull with input, for performance reasons, in libk it is not checked
 int putchar(int);
 
-// 
+// Prints a string to stdout, appending a newline
 int puts(const char*);
 
 #ifdef __cplusplus

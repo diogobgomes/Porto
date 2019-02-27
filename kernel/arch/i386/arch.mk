@@ -1,3 +1,10 @@
+# MAKEFILE CONFIGURE FILE
+#
+# Configure some architecture dependent make variables
+#
+#
+# 2019 Diogo Gomes
+
 KERNEL_ARCH_CFLAGS=
 KERNEL_ARCH_CXXFLAGS=
 KERNEL_ARCH_LDFLAGS=

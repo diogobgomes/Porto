@@ -1,4 +1,5 @@
-/* printf.c - stdio implementation of printf
+/* PRINTF.C - IMPLEMENTATION OF STDIO.H FUNCTION PRINTF()
+ *
  * Custom made for Porto
  *
  *

@@ -137,7 +137,7 @@ done
 # Destination of config.mk
 makefiles=`find . -name Makefile.in | sed 's/.in//'`
 makeconfig=config/make/config.mk
-outputconfig=config/make/output.mk
+outputconfig=config/make/output.mk.in
 
 echo "generating ${makeconfig} ..."
 
