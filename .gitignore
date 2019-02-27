@@ -1,4 +1,6 @@
 *.iso
 isodir
 sysroot
-*.todo
+**/*.todo
+**/*.log
+**/Makefile

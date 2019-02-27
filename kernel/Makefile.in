@@ -10,25 +10,18 @@
 # check local build directories
 # IMPORTANT: target crtbegin and crtend need revamp - no OBJ=...
 
-export
-override SHELL:=/bin/sh
-
 ifeq ($(MAKELEVEL),0)
-
-# Prepare to run as top makefile (not default)
-
-include ../config/make/make.config
 
 # Build directories (local)
 
-PREFIX?=/usr/local
+PREFIX?=$(PREFIX)/local
 EXEC_PREFIX?=$(PREFIX)
 BOOTDIR?=$(EXEC_PREFIX)/boot
 INCLUDEDIR?=$(PREFIX)/include
 
 endif
 
-include ../config/make/make.output
+include ../config/make/output.mk
 
 DESTDIR?=$(SYSROOT)
 
@@ -43,7 +36,7 @@ LIBS:=$(LIBS) -nostdlib -lk -lgcc
 
 ARCHDIR=arch/$(TARGETARCH)
 
-include $(ARCHDIR)/make.config
+include $(ARCHDIR)/arch.mk
 
 CFLAGS:=$(CFLAGS) $(KERNEL_ARCH_CFLAGS)
 CXXFLAGS:=$(CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
@@ -78,7 +71,7 @@ all: $(PROJECT_NAME).kernel
 $(PROJECT_NAME).kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	$(call cmd,ld)
 	$(Q)$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
-	@echo '  Checking for multiboot'
+	@echo '   Checking for multiboot'
 	$(Q)if $(ISOCHECKTOOL) --is-x86-multiboot $(PROJECT_NAME).kernel; then \
 	  echo '   Multiboot confirmed!'; \
 	else \

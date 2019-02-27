@@ -10,14 +10,7 @@
 # check local build directories
 # check HOSTEDOBJS and ARCH_HOSTEDOBJS
 
-export
-override SHELL:=/bin/sh
-
 ifeq ($(MAKELEVEL),0)
-
-# Prepare to run as top makefile (not default)
-
-include ../config/make/make.config
 
 # Build directories (local)
 
@@ -27,8 +20,6 @@ INCLUDEDIR?=$(PREFIX)/include
 LIBDIR?=$(EXEC_PREFIX)/lib
 
 endif
-
-include ../config/make/make.output
 
 DESTDIR?=$(SYSROOT)
 
@@ -43,7 +34,7 @@ LIBK_CXXFLAGS:=$(CXXFLAGS)
 
 ARCHDIR=arch/$(TARGETARCH)
 
-include $(ARCHDIR)/make.config
+include $(ARCHDIR)/arch.mk
 
 CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
 CXXFLAGS:=$(CXXFLAGS) $(ARCH_CXXFLAGS)

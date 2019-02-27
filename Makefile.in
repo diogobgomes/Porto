@@ -1,31 +1,21 @@
-# Makefile - Top level Makefile
-# ---------------------------------------------------------------------------
+# TOP LEVEL MAKEFILE - v0.1
 #
-# Run this makefile to build the entire OS
-# Run 'make help' for a list of targets
+# Not ready to be used as makefile, it's used by the configure script to build
+# the final Makefile, that will be used to build the entire project
 #
+# If you haven't already, run the configure script in the top level directory!
+#
+# In the final makefile, run 'make help' for a list of targets.
+#
+#
+# 2019 Diogo Gomes
 
 # TODO
 # add help target
-# confirm better way of handling install-headers
-# add dependency header tracking
 # add cleandep target
 # add ./configure
-export
+
 override SHELL:=/bin/sh
-
-ifeq ($(MAKELEVEL),0)
-include config/make/make.config
-endif
-
-include config/make/make.output
-
-# Build directories, defined here for global compilation
-export PREFIX:=/usr
-export EXEC_PREFIX:=$(PREFIX)
-export BOOTDIR:=/boot
-export LIBDIR:=$(EXEC_PREFIX)/lib
-export INCLUDEDIR:=$(PREFIX)/include
 
 # Subdirectories where we have to go with make
 SUBDIRS:=libc kernel
@@ -56,7 +46,7 @@ $(SYSROOT):
 
 install: all $(KERNEL_ISO)
 
-$(KERNEL_ISO):
+$(KERNEL_ISO): $(SUBDIRS)
 	@echo '   Installing OS to isodir/boot/grub'
 	$(Q)mkdir -p isodir/boot/grub
 	$(Q)cp sysroot/boot/$(PROJECT_NAME).kernel isodir/boot/$(PROJECT_NAME).kernel
