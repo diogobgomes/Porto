@@ -19,13 +19,6 @@ SUBVERSION := 0
 RELEASE := pre-alpha
 NAME := Albus Dumbledore
 
-# Architecture stuff
-TARGETARCH:=$(shell if echo "$(TARGET)" | grep -Eq 'i[[:digit:]]86-'; then \
-		echo i386; \
-	else \
-		echo "$(TARGET)" | grep -Eo '^[[:alnum:]_]*';\
-	fi)
-
 # Configure the cross-compiler to user the desired system-root
 CC+= --sysroot=$(SYSROOT)
 

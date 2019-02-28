@@ -21,7 +21,7 @@ HEADER_SUBDIR=include
 # Final kernel iso
 KERNEL_ISO := $(PROJECT_NAME)-$(VERSION).$(SUBVERSION)-$(RELEASE).iso
 
-.PHONY: all clean install qemu install-headers help
+.PHONY: all clean install qemu install-headers help distclean
 
 all: $(SUBDIRS)
 
@@ -61,6 +61,13 @@ clean:
 	-$(Q)rm -rf isodir
 	-$(Q)rm -rf $(KERNEL_ISO)
 	@echo '   Clean done!'
+
+distclean: clean
+	-$(Q)rm -rf $(shell find . -name '*.log')
+	-$(Q)rm -rf $(MAKECONFIG)
+	-$(Q)rm -rf $(shell find . -name 'Makefile')
+	@echo '   Clean done! - Makefiles were removed, you need to run'
+	@echo '   ./configure again for install!'
 
 qemu: install
 	@echo '   Starting qemu for $(TARGETARCH)'
