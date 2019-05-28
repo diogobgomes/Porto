@@ -13,17 +13,11 @@
 # TODO
 # add help target
 # check local build directories
-# IMPORTANT: target crtbegin and crtend need revamp - no OBJ=...
 
-ifeq ($(MAKELEVEL),0)
+SCRIPTVERSION:=0.1
 
-# Build directories (local)
-
-PREFIX?=$(PREFIX)/local
-EXEC_PREFIX?=$(PREFIX)
-BOOTDIR?=$(EXEC_PREFIX)/boot
-INCLUDEDIR?=$(PREFIX)/include
-
+ifneq ($(MADE_CONFIG),true)
+$(error We're not properly configured, run ./configure!!)
 endif
 
 DESTDIR?=$(SYSROOT)
@@ -110,3 +104,25 @@ $(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel: $(PROJECT_NAME).kernel
 	$(Q)cp $(PROJECT_NAME).kernel $(DESTDIR)$(BOOTDIR)
 
 -include $(OBJS:.o=.d)
+
+.PHONY: help
+
+help:
+	@printf 'Usage: make [target] ...\n\n'
+	@printf 'Miscellaneous:\n'
+	@printf '   help\t- Show this help\n' | expand -t 30
+	@printf '\n'
+	@printf 'Build:\n'
+	@printf '   [directory]/target]\t- Builds specified target\n' | expand -t 30
+	@printf '   $(PROJECT_NAME).kernel\t- Link the final kernel image\n' | expand -t 30
+	@printf '\n'
+	@printf 'Installing:\n'
+	@printf '   install\n'
+	@printf '   install-kernel\t- Installs the kernel to $(DESTDIR)$(BOOTDIR)\n' |\
+	expand -t 30
+	@printf '\n'
+	@printf 'Cleaning:\n'
+	@printf '   clean\t- Remove most generated files' | expand -t 30
+	@printf '\n\n'
+	@printf 'Written by Diogo Gomes, v%s\n' '$(SCRIPTVERSION)'
+	@printf '\n'

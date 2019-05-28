@@ -8,17 +8,6 @@
 #
 # 2019 Diogo Gomes
 
-ifneq ($(MADE_CONFIG),true)
-$(error We're not properly configured, run ./configure!!)
-endif
-
-# Versions, etc.
-PROJECT_NAME := porto
-VERSION := 0
-SUBVERSION := 0
-RELEASE := pre-alpha
-NAME := Albus Dumbledore
-
 # Configure the cross-compiler to user the desired system-root
 CC+= --sysroot=$(SYSROOT)
 

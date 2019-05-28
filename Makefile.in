@@ -14,14 +14,20 @@
 # add help target
 # add cleandep target
 
+SCRIPTVERSION:=0.1
+
+ifneq ($(MADE_CONFIG),true)
+$(error We're not properly configured, run ./configure!!)
+endif
+
 # Subdirectories where we have to go with make
 SUBDIRS:=libc kernel
 HEADER_SUBDIR=include
 
 # Final kernel iso
-KERNEL_ISO := $(PROJECT_NAME)-$(VERSION).$(SUBVERSION)-$(RELEASE).iso
+KERNEL_ISO := $(PROJECT_NAME)-$(VERSION)-$(RELEASE).iso
 
-.PHONY: all clean install qemu install-headers help distclean
+.PHONY: all clean install qemu install-headers distclean
 
 all: $(SUBDIRS)
 
@@ -46,7 +52,7 @@ install: all $(KERNEL_ISO)
 $(KERNEL_ISO): $(SUBDIRS)
 	@echo '   Installing OS to isodir/boot/grub'
 	$(Q)mkdir -p isodir/boot/grub
-	$(Q)cp sysroot/boot/$(PROJECT_NAME).kernel isodir/boot/$(PROJECT_NAME).kernel
+	$(Q)cp $(SYSROOT)$(BOOTDIR)/$(PROJECT_NAME).kernel isodir/boot/$(PROJECT_NAME).kernel
 	$(Q)echo "menuentry \"$(PROJECT_NAME)\" {\
 		multiboot /boot/$(PROJECT_NAME).kernel\
 	}" > isodir/boot/grub/grub.cfg
@@ -72,3 +78,32 @@ distclean: clean
 qemu: install
 	@echo '   Starting qemu for $(TARGETARCH)'
 	$(Q)qemu-system-$(TARGETARCH) -cdrom $(KERNEL_ISO)
+
+.PHONY: help
+help:
+	@printf 'Usage: make [target] ...\n\n'
+	@printf 'Miscellaneous:\n'
+	@printf '   help\t- Show this help\n' | expand -t 30
+	@printf '   qemu\t- Convenience script, does everything and launches qemu\n' |\
+	expand -t 30
+	@printf '\n'
+	@printf 'Build:\n'
+	@printf '   all\t- Build the entire project (goes into subdirectories)\n' |\
+	expand -t 30
+	@printf '   kernel\t- Only build the kernel\n' | expand -t 30
+	@printf '   libc\t- Only build the libc\n' | expand -t 30
+	@printf '\n'
+	@printf 'Installing:\n'
+	@printf '   install\t- Install the project to $(SYSROOT)\n' | expand -t 30
+	@printf '   install-headers\t- Install the header files to $(SYSROOT)\n' |\
+	expand -t 30
+	@printf '   $(KERNEL_ISO)\t- Build the final ISO\n' | expand -t 30
+	@printf '\n'
+	@printf 'Cleaning:\n'
+	@printf '   clean\t- Remove most generated files, but keep config and logs\n' |\
+	expand -t 30
+	@printf '   distclean\t- Remove everything (clean + remove config and logs)\n' |\
+	expand -t 30
+	@printf '\n\n'
+	@printf 'Written by Diogo Gomes, v%s\n' '$(SCRIPTVERSION)'
+	@printf '\n'

@@ -5,7 +5,6 @@
 #
 #
 # 2019 Diogo Gomes
-
 #
 # Beautify output - inspired by linux kernel makefiles
 # ---------------------------------------------------------------------------
@@ -26,7 +25,7 @@
 #
 # If KBUILD_VERBOSE equals 0 then the above command will be hidden.
 # If KBUILD_VERBOSE equals 1 then the above command is displayed.
-
+#
 # Set KBUILD_VERBOSE flag based on V=x command line flag
 
 ifeq ("$(origin V)", "command line")

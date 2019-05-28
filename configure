@@ -13,6 +13,17 @@
 # 2019 Diogo Gomes
 
 scriptversion="0.1"
+rootsrcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# ------------------------------------------------------------------------------
+# Versions
+# ------------------------------------------------------------------------------
+projectname="porto"
+version="$(sed -e '/Version/!d' -e 's/Version = //' ${rootsrcdir}/versions)"
+release="$(sed -e '/Release/!d' -e 's/Release = //' ${rootsrcdir}/versions)"
+codename="$(sed -e '/Name/!d' -e 's/Name = //' ${rootsrcdir}/versions)"
+
+# TODO: version, plus help
 
 # ------------------------------------------------------------------------------
 # Functions
@@ -20,6 +31,73 @@ scriptversion="0.1"
 # ------------------------------------------------------------------------------
 function help {
     echo "Work in progress"
+    printf 'Usage: ./configure [options] ... [var=value] ...\n\n'
+    printf 'All invalid options are silently ignored'
+    printf 'Configuration:\n'
+    printf '   -h, --help\t- display this help and exit\n' | expand -t 30
+    printf '   -V, --version\t- display version information and exit\n' | expand -t 30
+    printf '\n'
+    printf 'Installation directories:\n'
+    printf 'By default, we install everything to a sysroot\n'
+    printf '   --sysroot=SYSROOT\t- use SYSROOT as a sysroot, to be able to build everything properly [./sysroot]\n' |\
+    expand -t 30
+    printf '   --prefix=PREFIX\t- install architecture independent files in sysroot/PREFIX [sysroot/usr/]\n' |\
+    expand -t 30
+    printf '   --execprefix=EPREFIX\t- install architecture dependent files in sysroot/EPREFIX [PREFIX]\n' |\
+    expand -t 30
+    printf '   --libdir=LDIR\t- install library files to sysroot/LDIR [execprefix/lib]\n' |\
+    expand -t 30
+    printf '   --includedir=IDIR\t- install header files to sysroot/IDIR [prefix/include]\n' |\
+    expand -t 30
+    printf '   --bootdir=BDIR\t- install the kernel file to sysroot/BDIR [/boot]\n' |\
+    expand -t 30
+    printf '\n\n'
+    printf 'CROSS BUILD SYSTEM\n'
+    printf 'Directories:\n'
+    printf 'The cross build tools are in directories in the form [toolprefix]/[toolarchprefix] by default\n'
+    printf '   --toolprefix=PREFIX\t- prefix to the directory where the tools are located [$HOME/opt]\n' |\
+    expand -t 30
+    printf '   --toolarchprefix=PREFIX\t- prefix to the specific architecture directory [$target-cross/bin]\n' |\
+    expand -t 30
+    printf '   --toolarchdir=DIR\t- we can specify the tool directory directly [toolprefix/toolarchprefix]\n' |\
+    expand -t 30
+    printf '\n'
+    printf 'Programs:\n'
+    printf 'For cross-compiling, we assume the tools are already installed in toolarchdir, but we can specify the name\n'
+    printf 'By default, we assume the GNU toolchain (compiler and binutils) are being used, with names target-tool\n'
+    printf '  --ar=AR\t- specify the archive program being used to create .ar archives [toolarchdir/target-ar]\n' |\
+    expand -t 30
+    printf '  --as=AS\t- specify the assembler being used [toolarchdir/target-as]\n' |\
+    expand -t 30
+    printf '  --cc=CC\t- specify the C compiler being used [toolarchdir/target-gcc]\n' |\
+    expand -t 30
+    printf '  --cxx=CXX\t- specify the C++ compiler being used [toolarchdir/target-g++]\n' |\
+    expand -t 30
+    printf '  --isotool=TOOL\t- specify the program being used to create the final iso (grub2) [toolprefix/grub-2/bin/grub-mkrescue]\n' |\
+    expand -t 30
+    printf '  --isochecktool=TOOL\t- specify the program being used to create check the final iso for multiboot (grub2) [toolprefix/grub-2/bin/grub-file]\n' |\
+    expand -t 30
+    printf '\n'
+    printf 'Flags:\n'
+    printf '   --cflags=CFLAGS\t- choose the standart flags to be used by the C compiler (besides warning flags, always active) [-O2 -ffreestanding]\n' |\
+    expand -t 30
+    printf '   --cxxflags=CXXFLAGS\t- choose the standart flags to be used by the C++ compiler (besides warning flags, always active) [-O2]\n' |\
+    expand -t 30
+    printf '   --lblags=LDLAGS\t- choose the standart flags to be used by the linker [ ]\n' |\
+    expand -t 30
+    printf '   --libs=LIBS\t- libraries to pass to the linker [ ]\n' |\
+    expand -t 30
+    printf '   --enable-debug\t- include debugging symbols\n' | expand -t 30
+    printf '   --disable-debug\t- do not include debugging symbols\n' | expand -t 30
+    printf '\n\n'
+    printf './configure version %s, written by Diogo Gomes\n' ${scriptversion}
+    printf 'Report any bugs to the author\n'
+    printf '\n'
+}
+
+function version {
+    printf 'Porto configure version %s\n' ${scriptversion}
+    printf '\nWritten by Diogo Gomes, 2019\n'
 }
 
 function target_arch {
@@ -49,7 +127,6 @@ target=i686-elf # TODO: add targetarch
 targetarch=$(target_arch ${target})
 
 # Directories
-rootsrcdir=$(pwd)
 toolprefix=${HOME}/opt/
 toolarchprefix=${target}-cross/bin/
 toolarchdir=${toolprefix}${toolarchprefix}
@@ -57,8 +134,8 @@ ar=${toolarchdir}${target}-ar
 as=${toolarchdir}${target}-as
 cc=${toolarchdir}${target}-gcc
 cxx=${toolarchdir}${target}-g++
-isotool=${toolprefix}/grub-2/bin/grub-mkrescue
-isochecktool=${toolprefix}/grub-2/bin/grub-file
+isotool=${toolprefix}grub-2/bin/grub-mkrescue
+isochecktool=${toolprefix}grub-2/bin/grub-file
 sysroot=${rootsrcdir}/sysroot
 
 # Target directories
@@ -78,6 +155,14 @@ debugsym=true
 
 for arg in "$@"; do
     case "$arg" in
+    -V)
+        version
+        exit 0
+        ;;
+    --version)
+        version
+        exit 0
+        ;;
     --toolprefix=*)
         toolprefix=`echo $arg | sed 's/--toolprefix=//'`
         ;;
@@ -131,19 +216,28 @@ for arg in "$@"; do
     --cxxflags=*)
         cxxflags=`echo $arg | sed 's/--cxxflags=//'`
         ;;
+    --ldflags=*)
+        ldflags=`echo $arg | sed 's/--ldflags=//'`
+        ;;
+    --libs=*)
+        libs=`echo $arg | sed 's/--libs=//'`
+        ;;
+
+    --log-file=*)
+        configlog=`echo $arg | sed 's/--log-file=//'`
+        ;;
 
     --enable-debug)
         debugsym=true;;
     --disable-debug)
-        debugsym=false;;
+        debugsym=false;; # linux configure command log file
 
     --help)
-        echo 'usage: ./configure [options]'
-        echo 'options:'
-        echo '  --prefix=<path>: installation prefix'
-        echo '  --enable-debug: include debug symbols'
-        echo '  --disable-debug: do not include debug symbols'
-        echo 'all invalid options are silently ignored'
+        help
+        exit 0
+        ;;
+    -h)
+        help
         exit 0
         ;;
     esac
@@ -154,7 +248,15 @@ done
 # Then generate a config.log
 # ------------------------------------------------------------------------------
 
-configlog=config.log
+if [ -z $configlog ]; then
+    configlog=${rootsrcdir}/config.log
+fi
+
+if ! [ -w $configlog ] && [ -f $configlog ]; then
+    printf 'Error: Could not open log file: %s\n' ${configlog}
+    printf 'Aborting\n'
+    exit 3
+fi
 
 echo "CONFIGURATION LOG" > ${configlog}
 echo "" >> ${configlog}
@@ -178,7 +280,7 @@ if ${cc} -v &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: CC compiler not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
 printf 'Checking whether CXX compiler is present ...'
@@ -188,7 +290,7 @@ if ${cxx} -v &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: CXX compiler not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
 printf 'Checking whether AR is present ...'
@@ -198,7 +300,7 @@ if ${ar} --version &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: AR not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
 printf 'Checking whether AS is present ...'
@@ -208,7 +310,7 @@ if ${ar} --version &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: AS not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
 printf 'Checking whether xorriso is present ...'
@@ -218,7 +320,7 @@ if xorriso --version &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: xorriso not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
 printf 'Checking whether ISOTOOL is present ...'
@@ -228,17 +330,17 @@ if ${isotool} --version &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: ISOTOOL not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
-printf 'Checking whether qemu-system-${targetarch} is present ...'
+printf 'Checking whether qemu-system-%s is present ...' ${targetarch}
 log_header qemu-system-${targetarch} >> ${configlog}
 if qemu-system-${targetarch} --version &>> ${configlog}; then
     printf ' yes\n'
 else
     printf ' no\n'
-    echo 'Error: qemu-system-${targetarch} not found' | tee -a ${configlog}
-    exit 2
+    printf 'Error: qemu-system-%s not found' ${targetarch} | tee -a ${configlog}
+    exit 4
 fi
 
 printf 'Checking make version ...'
@@ -248,7 +350,7 @@ if make --version &>> ${configlog}; then
 else
     printf ' no\n'
     echo 'Error: make not found' | tee -a ${configlog}
-    exit 2
+    exit 4
 fi
 
 # ------------------------------------------------------------------------------
@@ -256,9 +358,23 @@ fi
 # ------------------------------------------------------------------------------
 
 # Destination of config.mk
-makefiles=`find . -name Makefile.in | sed 's/.in//'`
-makeconfig=config/make/config.mk
-outputconfig=config/make/output.mk.in
+makefiles=`find ${rootsrcdir} -name Makefile.in | sed 's/\.in *$//'`
+makeconfig=${rootsrcdir}/config/make/config.mk
+outputconfig=${rootsrcdir}/config/make/output.mk.in
+
+if ! [ -w $makeconfig ] && [ -f $makeconfig ]; then
+    printf 'Error: Could not open ${makeconfig}\n'
+    printf 'Aborting\n'
+    exit 2
+fi
+
+for name in ${makefiles}; do
+    if ! [ -w $name ] && [ -f $name ]; then
+        printf 'Error: Could not open ${name}\n'
+        printf 'Aborting\n'
+        exit 2
+    fi
+done
 
 echo "Generating ${makeconfig} ..."
 
@@ -268,6 +384,7 @@ echo "#" >> ${makeconfig}
 echo "# Autogenerated by configure version ${scriptversion} on $(date)" >> ${makeconfig}
 echo "# CHANGE IT AT YOUR OWN RISK!" >> ${makeconfig}
 echo "override SHELL:=/bin/sh" >> ${makeconfig}
+echo "unexport" >> ${makeconfig}
 
 # Writing configs to file
 echo "TARGET:=${target}" >> ${makeconfig}
@@ -295,6 +412,11 @@ fi
 echo "LDFLAGS:= ${ldflags}" >> ${makeconfig}
 echo "LIBS:= ${libs}" >> ${makeconfig}
 
+echo "PROJECT_NAME:= ${projectname}" >> ${makeconfig}
+echo "VERSION:= ${version}" >> ${makeconfig}
+echo "RELEASE:= ${release}" >> ${makeconfig}
+echo "CODENAME:= ${codename}" >> ${makeconfig}
+
 echo "MADE_CONFIG:=true" >> ${makeconfig}
 
 echo "MAKECONFIG:=${makeconfig}" >> ${makeconfig}
@@ -306,18 +428,23 @@ echo "# ------------------------------------------------------------------------
 
 # Writing the rest of the makeconfig
 echo "" >> ${makeconfig}
-cat ${makeconfig}.in >> ${makeconfig}
+python ${rootsrcdir}/build-scripts/comment-cleanup.py ${makeconfig}.in ${makeconfig}
 echo "" >> ${makeconfig}
-cat ${outputconfig} >> ${makeconfig} # Some configurations for the make output
+python ${rootsrcdir}/build-scripts/comment-cleanup.py ${outputconfig} ${makeconfig} # Some configurations for the make output
 
 # Writing all makefiles
 for name in ${makefiles}; do
     cat ${makeconfig} > $name
     echo "" >> $name
-    cat ${name}.in >> $name
+    python ${rootsrcdir}/build-scripts/comment-cleanup.py ${name}.in $name
+    echo "Generating ${name} ..."
 done
 
 # Writing make variables to config.log
+printf '\n\n\nWRITTEN FILES----------\n' >> ${configlog}
+for name in ${makefiles}; do
+    echo $name >> ${configlog}
+done
 printf '\n\n\nMAKE VARIABLES---------\n' >> ${configlog}
 echo "override SHELL:=/bin/sh" >> ${configlog}
 echo "TARGET:=${target}" >> ${configlog}
@@ -344,9 +471,12 @@ else
 fi
 echo "LDFLAGS:= ${ldflags}" >> ${configlog}
 echo "LIBS:= ${libs}" >> ${configlog}
+echo "PROJECT_NAME:= ${projectname}" >> ${configlog}
+echo "VERSION:= ${version}" >> ${configlog}
+echo "RELEASE:= ${release}" >> ${configlog}
+echo "CODENAME:= ${codename}" >> ${configlog}
 echo "MADE_CONFIG:=true" >> ${configlog}
 echo "MAKECONFIG:=${makeconfig}" >> ${configlog}
-
 
 
 echo 'Configuration complete, type make to build.'

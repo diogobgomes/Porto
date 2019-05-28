@@ -1,0 +1,26 @@
+# CONFIGURE FILE FOR LIBC MAKEFILES - v0.1
+#
+# Not usefull on it's own, to be included on all makefiles in libc's directory
+#
+#
+# 2019 Diogo Gomes
+
+DESTDIR?=$(SYSROOT)
+
+# Default compiler flags
+
+CFLAGS:=$(CFLAGS)
+CLFLAGS:= -D__is_libc -Iinclude
+CXXFLAGS:=$(CXXFLAGS)
+LIBK_CFLAGS:=$(CFLAGS)
+LIBK_CLFLAGS:=$(CFLAGS) -D__is_libk
+LIBK_CXXFLAGS:=$(CXXFLAGS)
+
+ARCHDIR=$(ROOT_SRCDIR)/libc/arch/$(TARGETARCH)
+
+include $(ARCHDIR)/arch.mk
+
+CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
+CXXFLAGS:=$(CXXFLAGS) $(ARCH_CXXFLAGS)
+LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
+LIBK_CXXFLAGS:=$(LIBK_CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)

@@ -15,48 +15,26 @@
 # check local build directories
 # check HOSTEDOBJS and ARCH_HOSTEDOBJS
 
-ifeq ($(MAKELEVEL),0)
+SCRIPTVERSION:=0.1
 
-# Build directories (local)
-
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-INCLUDEDIR?=$(PREFIX)/include
-LIBDIR?=$(EXEC_PREFIX)/lib
-
+ifneq ($(MADE_CONFIG),true)
+$(error We're not properly configured, run ./configure!!)
 endif
 
-DESTDIR?=$(SYSROOT)
+include config.mk
 
-# Default compiler flags
+SUBDIRS:= ctype stdio stdlib string
+SUBDIRS_INCLUDE=$(SUBDIRS:=/objs.mk)
 
-CFLAGS:=$(CFLAGS)
-CLFLAGS:= -D__is_libc -Iinclude
-CXXFLAGS:=$(CXXFLAGS)
-LIBK_CFLAGS:=$(CFLAGS)
-LIBK_CLFLAGS:=$(CFLAGS) -D__is_libk
-LIBK_CXXFLAGS:=$(CXXFLAGS)
+FREEOBJS:=\
+$(ARCH_FREEOBJS)
 
-ARCHDIR=arch/$(TARGETARCH)
+include $(SUBDIRS_INCLUDE)
 
-include $(ARCHDIR)/arch.mk
+.PHONY: list-freeobjs
 
-CFLAGS:=$(CFLAGS) $(ARCH_CFLAGS)
-CXXFLAGS:=$(CXXFLAGS) $(ARCH_CXXFLAGS)
-LIBK_CFLAGS:=$(LIBK_CFLAGS) $(KERNEL_ARCH_CFLAGS)
-LIBK_CXXFLAGS:=$(LIBK_CXXFLAGS) $(KERNEL_ARCH_CXXFLAGS)
-
-FREEOBJS=\
-$(ARCH_FREEOBJS) \
-stdio/printf.o \
-stdio/putchar.o \
-stdio/puts.o \
-stdlib/abort.o \
-string/memcmp.o \
-string/memcpy.o \
-string/memmove.o \
-string/memset.o \
-string/strlen.o \
+list-freeobjs:
+	@echo "Freeobjs being used: $(FREEOBJS)"
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \
@@ -70,7 +48,7 @@ LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 #BINARIES=libc.a libk.a # Not ready for libc yet.
 BINARIES=libk.a
 
-.PHONY: all clean install install-libs help
+.PHONY: all clean install install-libs
 
 all: $(BINARIES)
 
@@ -115,3 +93,28 @@ $(DESTDIR)$(LIBDIR)/$(BINARIES): $(BINARIES)
 
 -include $(OBJS:.o=.d)
 -include $(LIBK_OBJS:.o=.d)
+
+.PHONY: help
+
+help:
+	@printf 'Usage: make [target] ...\n\n'
+	@printf 'Miscellaneous:\n'
+	@printf '   help\t- Show this help\n' | expand -t 30
+	@printf '   list-freeobjs\t - Lists the objects to be included in the freestanding libc\n' |\
+	expand -t 30
+	@printf '\n'
+	@printf 'Build:\n'
+	@printf '   [directory]/[target]\t- Builds specified target\n' | expand -t 30
+	@printf "   For a list of possible targets, run \'make list-freeobjs\'\n"
+	@printf '\n'
+	@printf 'Installing:\n'
+	@printf '   libk.a\t- Creates the final libk archive\n' | expand -t 30
+	@printf '   install\n'
+	@printf '   install-libs\t- Installs the final libk.a archive to $(DESTDIR)$(LIBDIR)' |\
+	expand -t 30
+	@printf '\n'
+	@printf 'Cleaning:\n'
+	@printf '   clean\t- Remove most generated files' | expand -t 30
+	@printf '\n\n'
+	@printf 'Written by Diogo Gomes, v%s\n' '$(SCRIPTVERSION)'
+	@printf '\n'
