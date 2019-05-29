@@ -12,7 +12,6 @@
 
 # TODO
 # add cleandep target
-# deal with install headers differently
 
 SCRIPTVERSION:=0.1
 
@@ -38,7 +37,7 @@ all: $(SUBDIRS)
 install-headers: $(SYSROOT)$(INCLUDEDIR) $(HEADER_FILES_TARGET)
 
 $(SYSROOT)$(INCLUDEDIR):
-	$(Q)mkdir -p $(SYSROOT)$(INCLUDEDIR)
+	$(Q)mkdir -p $(addprefix $(SYSROOT)$(INCLUDEDIR)/, $(shell find $(HEADER_SUBDIR) -type d -printf '%P '))
 
 #$(HEADER_FILES):
 #	$(Q)mkdir -p $(SYSROOT)$(INCLUDEDIR)

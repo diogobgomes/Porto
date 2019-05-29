@@ -145,6 +145,10 @@ bootdir=/boot
 libdir=${execprefix}/lib
 includedir=${prefix}/include
 
+#Targets
+withlibc="" # Default because we're nowhere near ready for libc
+withlibk="libk.a"
+
 # Tool flags
 cflags="-O2 -ffreestanding"
 cxxflags="-O2"
@@ -208,6 +212,13 @@ for arg in "$@"; do
         ;;
     --includedir=*)
         includedir=`echo $arg | sed 's/--includedir=//'`
+        ;;
+
+    --with-libc)
+        withlibc="libc.a"
+        ;;
+    --without-libc)
+        withlibc=""
         ;;
 
     --cflags=*)
@@ -402,6 +413,9 @@ echo "EXEC_PREFIX?=${execprefix}" >> ${makeconfig}
 echo "BOOTDIR?=${bootdir}" >> ${makeconfig}
 echo "LIBDIR?=${libdir}" >> ${makeconfig}
 echo "INCLUDEDIR?=${includedir}" >> ${makeconfig}
+echo "LIBC-BIN:=${withlibc}" >> ${makeconfig}
+echo "LIBK-BIN:=${withlibk}" >> ${makeconfig}
+echo "LIBBINARIES:=${withlibk} ${withlibc}" >> ${makeconfig}
 if $debugsym; then
     echo "CFLAGS:= ${cflags} -g" >> ${makeconfig}
     echo "CXXFLAGS:= ${cxxflags} -g" >> ${makeconfig}
@@ -462,6 +476,9 @@ echo "EXEC_PREFIX?=${execprefix}" >> ${configlog}
 echo "BOOTDIR?=${bootdir}" >> ${configlog}
 echo "LIBDIR?=${libdir}" >> ${configlog}
 echo "INCLUDEDIR?=${includedir}" >> ${configlog}
+echo "LIBC-BIN:=${withlibc}" >> ${configlog}
+echo "LIBK-BIN:=${withlibk}" >> ${configlog}
+echo "LIBBINARIES:=${withlibk} ${withlibc}" >> ${configlog}
 if $debugsym; then
     echo "CFLAGS:= ${cflags} -g" >> ${configlog}
     echo "CXXFLAGS:= ${cxxflags} -g" >> ${configlog}

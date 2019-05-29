@@ -12,9 +12,6 @@
 
 # TODO
 # add help target
-# check local build directories
-# check HOSTEDOBJS and ARCH_HOSTEDOBJS
-#!!! check line 83, if it works with both libk and libc
 
 SCRIPTVERSION:=0.1
 
@@ -41,12 +38,9 @@ $(HOSTEDOBJS) \
 
 LIBK_OBJS=$(FREEOBJS:.o=.libk.o)
 
-#BINARIES=libc.a libk.a # Not ready for libc yet.
-BINARIES=libk.a
-
 .PHONY: all clean install install-libs
 
-all: $(BINARIES)
+all: $(LIBBINARIES)
 
 libc.a: $(OBJS)
 	$(call cmd,ar)
@@ -73,16 +67,16 @@ libk.a: $(LIBK_OBJS)
 	$(Q)$(CC) -MD -c $< -o $@ $(LIBK_CFLAGS) $(LIBK_CLFLAGS)
 
 clean:
-	-$(Q)rm -f $(BINARIES) *.a
+	-$(Q)rm -f $(LIBBINARIES) *.a
 	-$(Q)rm -f $(shell find . -name '*.o')
 	-$(Q)rm -f $(shell find . -name '*.d')
 	@echo '   Clean done!'
 
 install: install-libs
 
-install-libs: $(BINARIES) $(addprefix $(DESTDIR)$(LIBDIR)/, $(BINARIES))
+install-libs: $(LIBBINARIES) $(addprefix $(DESTDIR)$(LIBDIR)/, $(LIBBINARIES))
 
-$(addprefix $(DESTDIR)$(LIBDIR)/, $(BINARIES)): $(BINARIES)
+$(addprefix $(DESTDIR)$(LIBDIR)/, $(LIBBINARIES)): $(LIBBINARIES)
 	@echo '   Installing $< to $(DESTDIR)$(LIBDIR)'
 	$(Q)mkdir -p $(DESTDIR)$(LIBDIR)
 	$(Q)cp $< $(DESTDIR)$(LIBDIR)
