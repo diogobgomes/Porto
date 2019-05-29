@@ -8,7 +8,7 @@
 
 # libk's objects
 FREEOBJS:=$(FREEOBJS) \
-stdio/printf.o \
+stdio/fmtio.o \
 stdio/putchar.o \
 stdio/puts.o \
 
