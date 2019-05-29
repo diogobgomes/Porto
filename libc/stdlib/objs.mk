@@ -11,6 +11,7 @@ FREEOBJS:=$(FREEOBJS) \
 stdlib/abort.o \
 stdlib/atoi.o \
 stdlib/itoa.o \
+stdlib/uitoa.o \
 stdlib/strtol.o \
 
 # libc's objects
