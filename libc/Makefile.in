@@ -14,6 +14,7 @@
 # add help target
 # check local build directories
 # check HOSTEDOBJS and ARCH_HOSTEDOBJS
+#!!! check line 83, if it works with both libk and libc
 
 SCRIPTVERSION:=0.1
 
@@ -30,11 +31,6 @@ FREEOBJS:=\
 $(ARCH_FREEOBJS)
 
 include $(SUBDIRS_INCLUDE)
-
-.PHONY: list-freeobjs
-
-list-freeobjs:
-	@echo "Freeobjs being used: $(FREEOBJS)"
 
 HOSTEDOBJS=\
 $(ARCH_HOSTEDOBJS) \
@@ -84,12 +80,12 @@ clean:
 
 install: install-libs
 
-install-libs: $(BINARIES) $(DESTDIR)$(LIBDIR)/$(BINARIES)
+install-libs: $(BINARIES) $(addprefix $(DESTDIR)$(LIBDIR)/, $(BINARIES))
 
-$(DESTDIR)$(LIBDIR)/$(BINARIES): $(BINARIES)
-	@echo '   Installing libraries to $(DESTDIR)$(LIBDIR)'
+$(addprefix $(DESTDIR)$(LIBDIR)/, $(BINARIES)): $(BINARIES)
+	@echo '   Installing $< to $(DESTDIR)$(LIBDIR)'
 	$(Q)mkdir -p $(DESTDIR)$(LIBDIR)
-	$(Q)cp $(BINARIES) $(DESTDIR)$(LIBDIR)
+	$(Q)cp $< $(DESTDIR)$(LIBDIR)
 
 -include $(OBJS:.o=.d)
 -include $(LIBK_OBJS:.o=.d)
@@ -98,6 +94,11 @@ $(DESTDIR)$(LIBDIR)/$(BINARIES): $(BINARIES)
 
 help:
 	@printf 'Usage: make [target] ...\n\n'
+	@printf 'Options:\n'
+	@printf '   V=0|1\t- 0 for normal output, 1 for verbosity\n' |\
+	expand -t 30
+	@echo "   There are various variable you can set, but it's better to configure them in ./configure"
+	@printf '\n'
 	@printf 'Miscellaneous:\n'
 	@printf '   help\t- Show this help\n' | expand -t 30
 	@printf '   list-freeobjs\t - Lists the objects to be included in the freestanding libc\n' |\
@@ -118,3 +119,7 @@ help:
 	@printf '\n\n'
 	@printf 'Written by Diogo Gomes, v%s\n' '$(SCRIPTVERSION)'
 	@printf '\n'
+
+.PHONY: list-freeobjs
+list-freeobjs:
+	@echo "Freeobjs being used: $(FREEOBJS)"

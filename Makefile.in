@@ -11,8 +11,8 @@
 # 2019 Diogo Gomes
 
 # TODO
-# add help target
 # add cleandep target
+# deal with install headers differently
 
 SCRIPTVERSION:=0.1
 
@@ -23,6 +23,10 @@ endif
 # Subdirectories where we have to go with make
 SUBDIRS:=libc kernel
 HEADER_SUBDIR=include
+HEADER_FILES:=$(shell find $(HEADER_SUBDIR) -type f)
+HEADER_FILES_TARGET=$(patsubst $(HEADER_SUBDIR)/%, $(SYSROOT)$(INCLUDEDIR)/%, \
+$(HEADER_FILES))
+#HEADER_FILES_TARGET=$(addprefix $(SYSROOT)$(INCLUDEDIR)/, $(notdir $(HEADER_FILES)))
 
 # Final kernel iso
 KERNEL_ISO := $(PROJECT_NAME)-$(VERSION)-$(RELEASE).iso
@@ -31,12 +35,14 @@ KERNEL_ISO := $(PROJECT_NAME)-$(VERSION)-$(RELEASE).iso
 
 all: $(SUBDIRS)
 
-install-headers: $(SYSROOT) $(SYSROOT)$(INCLUDEDIR)
+install-headers: $(SYSROOT)$(INCLUDEDIR) $(HEADER_FILES_TARGET)
 
-$(SYSROOT)$(INCLUDEDIR): $(HEADER_SUBDIR)
-	@echo 'Installing headers to $(SYSROOT)$(INCLUDEDIR)'
+$(SYSROOT)$(INCLUDEDIR):
 	$(Q)mkdir -p $(SYSROOT)$(INCLUDEDIR)
-	$(Q)cp -R --preserve=timestamp $(HEADER_SUBDIR)/. $(SYSROOT)$(INCLUDEDIR)
+
+#$(HEADER_FILES):
+#	$(Q)mkdir -p $(SYSROOT)$(INCLUDEDIR)
+#	$(Q)cp -R --preserve=timestamp $< $(SYSROOT)$(INCLUDEDIR)/
 
 $(SUBDIRS): $(SYSROOT) install-headers
 	@$(MAKE) -C $@ install
@@ -45,7 +51,6 @@ kernel: libc
 
 $(SYSROOT):
 	$(Q)mkdir -p $(SYSROOT)
-
 
 install: all $(KERNEL_ISO)
 
@@ -58,6 +63,10 @@ $(KERNEL_ISO): $(SUBDIRS)
 	}" > isodir/boot/grub/grub.cfg
 	@echo '   Creating bootloader image...'
 	$(Q)$(ISOTOOL) -o $(KERNEL_ISO) isodir
+
+# Never use alone in command line, invoke only through "make install-headers"
+$(SYSROOT)$(INCLUDEDIR)/%.h: $(HEADER_SUBDIR)/%.h
+	$(Q)cp --preserve=timestamp $< $@
 
 clean:
 	@for dir in $(SUBDIRS); do \
@@ -81,7 +90,12 @@ qemu: install
 
 .PHONY: help
 help:
-	@printf 'Usage: make [target] ...\n\n'
+	@printf 'Usage: make [options] [target] ...\n\n'
+	@printf 'Options:\n'
+	@printf '   V=0|1\t- 0 for normal output, 1 for verbosity\n' |\
+	expand -t 30
+	@echo "   There are various variable you can set, but it's better to configure them in ./configure"
+	@printf '\n'
 	@printf 'Miscellaneous:\n'
 	@printf '   help\t- Show this help\n' | expand -t 30
 	@printf '   qemu\t- Convenience script, does everything and launches qemu\n' |\

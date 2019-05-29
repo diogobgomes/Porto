@@ -109,6 +109,11 @@ $(DESTDIR)$(BOOTDIR)/$(PROJECT_NAME).kernel: $(PROJECT_NAME).kernel
 
 help:
 	@printf 'Usage: make [target] ...\n\n'
+	@printf 'Options:\n'
+	@printf '   V=0|1\t- 0 for normal output, 1 for verbosity\n' |\
+	expand -t 30
+	@echo "   There are various variable you can set, but it's better to configure them in ./configure"
+	@printf '\n'
 	@printf 'Miscellaneous:\n'
 	@printf '   help\t- Show this help\n' | expand -t 30
 	@printf '\n'
