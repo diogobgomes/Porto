@@ -8,7 +8,7 @@
 
 # libk's objects
 FREEOBJS:=$(FREEOBJS) \
-ctype/istype.o \
+ctype/ctype.o \
 
 # libc's objects
 HOSTEDOBJS=$(HOSTEDOBJS)\
