@@ -27,7 +27,7 @@ char *itoa(int value, char *dptr, int base) {
 	}
 
 	// Possible symbols, for any base
-	char symbols[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+	const char symbols[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 	// Do cycle, creates the string reversed
 	do {
