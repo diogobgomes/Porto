@@ -34,6 +34,9 @@ void* memset(void* bufptr, int value, size_t size);
 // Returns the lenght of str (str is a C type string)
 size_t strlen(const char* str);
 
+// Locate the first occurrence of character in string
+char* strchr(const char* str, char c);
+
 #ifdef __cplusplus
 }
 #endif

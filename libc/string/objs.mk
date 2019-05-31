@@ -13,6 +13,7 @@ string/memcpy.o \
 string/memmove.o \
 string/memset.o \
 string/strlen.o \
+string/strchr.o \
 
 # libc's objects
 HOSTEDOBJS=$(HOSTEDOBJS)\
