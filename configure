@@ -119,43 +119,8 @@ function log_header {
 }
 
 # ------------------------------------------------------------------------------
-# Defaults
-# These are the default values for our build variables
+# User-defined Variables
 # ------------------------------------------------------------------------------
-
-target=i686-elf # TODO: add targetarch
-targetarch=$(target_arch ${target})
-
-# Directories
-toolprefix=${HOME}/opt/
-toolarchprefix=${target}-cross/bin/
-toolarchdir=${toolprefix}${toolarchprefix}
-ar=${toolarchdir}${target}-ar
-as=${toolarchdir}${target}-as
-cc=${toolarchdir}${target}-gcc
-cxx=${toolarchdir}${target}-g++
-isotool=${toolprefix}grub-2/bin/grub-mkrescue
-isochecktool=${toolprefix}grub-2/bin/grub-file
-sysroot=${rootsrcdir}/sysroot
-
-# Target directories
-prefix=/usr
-execprefix=${prefix}
-bootdir=/boot
-libdir=${execprefix}/lib
-includedir=${prefix}/include
-
-#Targets
-withlibc="" # Default because we're nowhere near ready for libc
-withlibk="libk.a"
-
-# Tool flags
-cflags="-O2 -ffreestanding"
-cxxflags="-O2"
-ldflags=
-libs=
-
-debugsym=true
 
 for arg in "$@"; do
     case "$arg" in
@@ -255,6 +220,46 @@ for arg in "$@"; do
 done
 
 # ------------------------------------------------------------------------------
+# Defaults
+# These are the default values for our build variables
+# ------------------------------------------------------------------------------
+
+target=i686-elf # TODO: add targetarch
+targetarch=$(target_arch ${target})
+
+# Directories
+toolprefix=${toolprefix:-${HOME}/opt/}
+toolarchprefix=${toolarchprefix:-${target}-cross/bin/}
+toolarchdir=${toolarchdir:-${toolprefix}/${toolarchprefix}}
+ar=${ar:-${toolarchdir}/${target}-ar}
+as=${as:-${toolarchdir}/${target}-as}
+cc=${cc:-${toolarchdir}/${target}-gcc}
+cxx=${cxx:-${toolarchdir}/${target}-g++}
+isotool=${isotool:-${toolprefix}/grub-2/bin/grub-mkrescue}
+isochecktool=${isochecktool:-${toolprefix}/grub-2/bin/grub-file}
+sysroot=${sysroot:-${rootsrcdir}/sysroot}
+
+# Target directories
+prefix=${prefix:-/usr}
+execprefix=${execprefix:-${prefix}}
+bootdir=${bootdir:-/boot}
+libdir=${libdir:-${execprefix}/lib}
+includedir=${includedir:-${prefix}/include}
+
+#Targets
+withlibc=${withlibc:-""} # Default because we're nowhere near ready for libc
+withlibk="libk.a"
+
+# Tool flags
+cflags=${cflags:-"-O2 -ffreestanding"}
+cxxflags=${cxxflags:-"-O2"}
+ldflags=${ldflags:-""}
+libs=${libs:-""}
+
+debugsym=${debugsym:-true}
+
+
+# ------------------------------------------------------------------------------
 # Checking whether we have everything we expect to build the project
 # Then generate a config.log
 # ------------------------------------------------------------------------------
@@ -280,9 +285,12 @@ echo "PLATFORM---------" >> ${configlog}
 echo "hostname = $(hostname)" | tee -a ${configlog}
 echo "Machine Hardware (uname -m) = $(uname -m)" | tee -a ${configlog}
 echo "Kernel Release (uname -r) = $(uname -r)" | tee -a ${configlog}
-echo "Kernel Name (uname -s) = $(uname -n)" | tee -a ${configlog}
+# Fixed a bug!
+echo "Kernel Name (uname -s) = $(uname -s)" | tee -a ${configlog}
 echo "Kernel Version (uname -v) = $(uname -v)" | tee -a ${configlog}
 echo "" >> ${configlog}
+
+echo "Using cross build tool directory ${toolarchdir}" | tee -a ${configlog}
 
 printf 'Checking whether CC compiler is present ...'
 log_header CC >> ${configlog}
