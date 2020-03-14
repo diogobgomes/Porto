@@ -21,7 +21,7 @@ endif
 
 include config.mk
 
-SUBDIRS:= ctype stdio stdlib string
+SUBDIRS:= stdio stdlib string
 SUBDIRS_INCLUDE=$(SUBDIRS:=/objs.mk)
 
 FREEOBJS:=\

@@ -65,6 +65,7 @@ $(KERNEL_ISO): $(SUBDIRS)
 
 # Never use alone in command line, invoke only through "make install-headers"
 $(SYSROOT)$(INCLUDEDIR)/%.h: $(HEADER_SUBDIR)/%.h
+	@echo '   Installing headers to $(SYSROOT)$(INCLUDEDIR)'
 	$(Q)cp --preserve=timestamp $< $@
 
 clean:
