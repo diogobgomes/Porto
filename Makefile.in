@@ -30,7 +30,7 @@ $(HEADER_FILES))
 # Final kernel iso
 KERNEL_ISO := $(PROJECT_NAME)-$(VERSION)-$(RELEASE).iso
 
-.PHONY: all clean install qemu install-headers distclean
+.PHONY: all clean install qemu install-headers distclean docs
 
 all: $(SUBDIRS)
 
@@ -78,6 +78,8 @@ clean:
 	@echo '   Clean done!'
 
 distclean: clean
+	-$(Q)rm -rf docs/Doxyfile
+	-$(Q)rm -rf docs/html docs/latex
 	-$(Q)rm -rf $(shell find . -name '*.log')
 	-$(Q)rm -rf $(MAKECONFIG)
 	-$(Q)rm -rf $(shell find . -name 'Makefile')
@@ -87,6 +89,14 @@ distclean: clean
 qemu: install
 	@echo '   Starting qemu for $(TARGETARCH)'
 	$(Q)qemu-system-$(TARGETARCH) -cdrom $(KERNEL_ISO)
+
+docs:
+	#<makedocs>
+	@echo '   Building documentation'
+	-$(Q)doxygen docs/Doxyfile
+	#<makedocs_error>
+	$(error We didn't detect doxygen during configuration, please make sure it's installed and run 'configure again')
+	#<!makedocs>
 
 .PHONY: help
 help:

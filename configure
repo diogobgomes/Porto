@@ -12,7 +12,7 @@
 #
 # 2019 Diogo Gomes
 
-scriptversion="0.1"
+scriptversion="0.2"
 rootsrcdir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # ------------------------------------------------------------------------------
@@ -116,6 +116,7 @@ function log_header {
     echo "$1"
     echo ""
     echo "###################################################"
+    echo ""
 }
 
 # ------------------------------------------------------------------------------
@@ -362,6 +363,19 @@ else
     exit 4
 fi
 
+printf 'Checking whether doxygen is present ...'
+log_header DOXYGEN >> ${configlog}
+if doxygen -v &>> ${configlog}; then
+    printf ' yes\n'
+    build_docs=yes
+else
+    printf ' no\n'
+    build_docs=no
+    echo "Warning: doxygen not found, we'll not be able to build the\
+    documentation" | tee -a ${configlog}
+    #exit 4
+fi
+
 printf 'Checking make version ...'
 log_header MAKE >> ${configlog}
 if make --version &>> ${configlog}; then
@@ -502,6 +516,26 @@ echo "RELEASE:= ${release}" >> ${configlog}
 echo "CODENAME:= ${codename}" >> ${configlog}
 echo "MADE_CONFIG:=true" >> ${configlog}
 echo "MAKECONFIG:=${makeconfig}" >> ${configlog}
+
+# ------------------------------------------------------------------------------
+# Generate the Doxyfile from Doxyfile.in
+# ------------------------------------------------------------------------------
+echo "" >> ${configlog}
+echo "" >> ${configlog}
+log_header Doxyfile >> ${configlog}
+echo "Writing Doxyfile to ${rootsrcdir}/Doxygen..." | tee -a ${configlog}
+# Generate doxyfile
+sed -e "s,@Doxygen_Output_Directory,${rootsrcdir}/docs," -e \
+"s,@Doxygen_Input_Directory,${rootsrcdir}/kernel ${rootsrcdir}/libc \
+${rootsrcdir}/include," < ${rootsrcdir}/docs/Doxyfile.in \
+> ${rootsrcdir}/docs/Doxyfile
+# Configure the makefile if we can't use doxygen
+python ${rootsrcdir}/build-scripts/doxygen-cleanup.py\
+ ${rootsrcdir}/Makefile ${build_docs} &> /dev/null
+if [ $? -ne 0 ]; then
+    echo "Error: Error when modifying the Makefile target docs" | tee -a ${configlog}
+    exit 5
+fi
 
 
 echo 'Configuration complete, type make to build.'
