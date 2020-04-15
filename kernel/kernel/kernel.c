@@ -10,6 +10,10 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <limits.h>
 
 #include <kernel/tty.h>
 
@@ -17,5 +21,15 @@ void kernel_main(void);
 
 void kernel_main(void) {
 	terminal_initialize();
-	printf("Hello kernel world!\n");
+	char * c = "123";
+	int i = strtol(c,NULL,0);
+
+	printf("%i\n", i);
+//	printf("%u",UINT_MAX);
+
+
+/*	for(int i = 0; i < 99; i++) {
+		printf("%i\n",i);
+	}*/
+
 }

@@ -12,6 +12,7 @@
 #include <kernel/tty.h>
 #endif
 
+// TODO: Return -1 if error
 // Prints a single char to stdout. It's most often used as a backend for more
 // common functions such as printf
 int putchar(int ic) {

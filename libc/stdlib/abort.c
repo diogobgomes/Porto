@@ -12,6 +12,7 @@
 // Terminates execution abnormally, in libk mode should call a kernel panic of
 // some sort. For now, it simply prints and does nothing (so yeah, completely 
 // useless, dangerous garbage)
+
 __attribute__((__noreturn__))
 void abort(void) {
 #if defined(__is_libk)

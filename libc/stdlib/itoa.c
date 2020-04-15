@@ -9,6 +9,8 @@
 
 #include <stdlib.h>
 
+//FIXME: FAILS ON THE LARGEST POSSIBLE NEGATIVE NUMBER!!!
+
 char *itoa(int value, char *dptr, int base) {
 	// Checking if the base is valid
 	// Valid bases are between 2 and 36 (whole alphabet + numerals 0-9)
